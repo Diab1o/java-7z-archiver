@@ -1,82 +1,65 @@
 package com.swemel.sevenzip.archive;
 
+import com.swemel.sevenzip.RefItem;
 import com.swemel.sevenzip.UpdateItem;
 import com.swemel.sevenzip.common.InStreamWithCRC;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.List;
 
-/**
- * Created by IntelliJ IDEA.
- * User: sokolov_a
- * Date: 20.04.2011
- * Time: 19:09:08
- * To change this template use File | Settings | File Templates.
- */
 public class SevenZipFolderInStream extends InputStream {
-    InStreamWithCRC stream;
+    private InStreamWithCRC stream;
 
-    boolean _currentSizeIsDefined;
-    boolean _fileIsOpen;
-    long _currentSize;
-    long _filePos;
-    Vector<UpdateItem> updateItems;
-    Vector<Integer> indices;
-    int _numFiles;
-    int _fileIndex;
-    int off;
-    long size=0;
+    private boolean _fileIsOpen;
+    private long _filePos;
+    private List<UpdateItem> updateItems;
+    private int _numFiles;
+    private int _fileIndex;
+    private int off;
+    private long size = 0;
 
-    Vector<Boolean> processed = new Vector<Boolean>();
-    Vector<Integer> CRCs = new Vector<Integer>();
-    Vector<Long> sizes = new Vector<Long>();
+    private final List<Integer> CRCs = new ArrayList<>();
+    private final List<Long> sizes = new ArrayList<>();
 
 
-    public void init(Vector<UpdateItem> updateItems, Vector<Integer> indices, int off, int numFiles) {
+    public void init(List<UpdateItem> updateItems, int off, int numFiles) {
         this.updateItems = updateItems;
         _numFiles = numFiles;
         _fileIndex = 0;
-        this.off=off;
-        processed.clear();
+        this.off = off;
         CRCs.clear();
         sizes.clear();
         _fileIsOpen = false;
-        this.indices=indices;
-        _currentSizeIsDefined = false;
-        size=0;
+        size = 0;
     }
 
     void openStream() throws FileNotFoundException {
         _filePos = 0;
         while (_fileIndex < _numFiles) {
-            stream = new InStreamWithCRC(updateItems.get(indices.get(off+_fileIndex)).getFullName());
+            stream = new InStreamWithCRC(updateItems.get(off + _fileIndex).getFullName());
 
             _fileIndex++;
             stream.init();
             if (stream != null) {
                 _fileIsOpen = true;
 
-                _currentSize = stream.getSize();
-                _currentSizeIsDefined = true;
                 return;
             }
             sizes.add(0L);
-            processed.add(true);
             addDigest();
         }
     }
 
-    public void addDigest() {
+    void addDigest() {
         CRCs.add(stream.getCrc());
     }
 
-    public void closeStream() throws IOException {
+    void closeStream() throws IOException {
         stream.releaseStream();
         _fileIsOpen = false;
-        _currentSizeIsDefined = false;
-        processed.add(true);
         sizes.add(_filePos);
         addDigest();
     }
@@ -84,12 +67,11 @@ public class SevenZipFolderInStream extends InputStream {
 
     @Override
     public int read(byte[] b) throws IOException {
-        return read(b,0,b.length);
+        return read(b, 0, b.length);
     }
 
 
-    public int getCrc(int i)
-    {
+    public int getCrc(int i) {
         return CRCs.get(i);
     }
 
@@ -105,7 +87,7 @@ public class SevenZipFolderInStream extends InputStream {
                     continue;
                 }
                 processedSize = processed2;
-                size+=processed2;
+                size += processed2;
                 _filePos += processed2;
                 break;
             }
@@ -118,15 +100,16 @@ public class SevenZipFolderInStream extends InputStream {
 
     public long getFullSize() {
         long size = 0;
-        for (int i = 0; i < sizes.size(); i++)
-            size += sizes.get(i);
+        for (Long i : sizes) {
+            size += i;
+        }
         return size;
     }
 
     @Override
     public int read() throws IOException {
         byte[] ret = new byte[1];
-        if(read(ret)<0) return -1;
+        if (read(ret) < 0) return -1;
         return ret[0];
     }
 }

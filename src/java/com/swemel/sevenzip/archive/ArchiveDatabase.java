@@ -2,27 +2,22 @@ package com.swemel.sevenzip.archive;
 
 import com.swemel.sevenzip.Folder;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 
-/**
- * Created by IntelliJ IDEA.
- * User: sokolov_a
- * Date: 24.02.2011
- * Time: 18:13:46
- * To change this template use File | Settings | File Templates.
- */
-public class ArchiveDatabase {
-    protected Vector<Long> packSizes = new Vector<Long>();
-    protected Vector<Boolean> packCRCsDefined = new Vector<Boolean>();
-    protected Vector<Integer> packCRCs = new Vector<Integer>();
-    protected Vector<Folder> folders = new Vector<Folder>();
-    protected Vector<Integer> numUnPackStreamsVector = new Vector<Integer>();
-    protected Vector<FileItem> files = new Vector<FileItem>();
-    protected Vector<Boolean> isAnti = new Vector<Boolean>();
-    protected Vector<Long> mTimes = new Vector<Long>();
-    protected Vector<Boolean> mTimesDefined = new Vector<Boolean>();
+public final class ArchiveDatabase {
+    private final List<Long> packSizes = new ArrayList<Long>();
+    private List<Boolean> packCRCsDefined = new ArrayList<Boolean>();
+    private List<Integer> packCRCs = new ArrayList<Integer>();
+    private List<Folder> folders = new ArrayList<Folder>();
+    private List<Integer> numUnPackStreamsVector = new ArrayList<Integer>();
+    private List<FileItem> files = new ArrayList<FileItem>();
+    private final List<Boolean> isAnti = new ArrayList<Boolean>();
+    private final List<Long> mTimes = new ArrayList<Long>();
+    private final List<Boolean> mTimesDefined = new ArrayList<Boolean>();
 
-    void Clear() {
+    public void clear() {
         packSizes.clear();
         packCRCsDefined.clear();
         packCRCs.clear();
@@ -32,21 +27,19 @@ public class ArchiveDatabase {
     }
 
 
-    public Vector<Long> getMTimes() {
+    public List<Long> getMTimes() {
         return mTimes;
     }
 
-    public Vector<Boolean> getMTimesDefined() {
+    public List<Boolean> getMTimesDefined() {
         return mTimesDefined;
     }
 
-    public void addMTime(long mTime)
-    {
+    public void addMTime(long mTime) {
         mTimes.add(mTime);
     }
 
-    public void addMTimeDefined(boolean mTimeDefined)
-    {
+    public void addMTimeDefined(boolean mTimeDefined) {
         mTimesDefined.add(mTimeDefined);
     }
 
@@ -64,7 +57,7 @@ public class ArchiveDatabase {
         folders.add(f);
     }
 
-    public Vector<Long> getPackSizes() {
+    public List<Long> getPackSizes() {
         return packSizes;
     }
 
@@ -72,7 +65,7 @@ public class ArchiveDatabase {
         packSizes.add(packSize);
     }
 
-    public Vector<Boolean> getPackCRCsDefined() {
+    public List<Boolean> getPackCRCsDefined() {
         return packCRCsDefined;
     }
 
@@ -80,7 +73,7 @@ public class ArchiveDatabase {
         this.packCRCsDefined = packCRCsDefined;
     }
 
-    public Vector<Integer> getPackCRCs() {
+    public List<Integer> getPackCRCs() {
         return packCRCs;
     }
 
@@ -88,7 +81,7 @@ public class ArchiveDatabase {
         this.packCRCs = packCRCs;
     }
 
-    public Vector<Folder> getFolders() {
+    public List<Folder> getFolders() {
         return folders;
     }
 
@@ -96,7 +89,7 @@ public class ArchiveDatabase {
         this.folders = folders;
     }
 
-    public Vector<Integer> getNumUnPackStreamsVector() {
+    public List<Integer> getNumUnPackStreamsVector() {
         return numUnPackStreamsVector;
     }
 
@@ -104,7 +97,7 @@ public class ArchiveDatabase {
         this.numUnPackStreamsVector = numUnPackStreamsVector;
     }
 
-    public Vector<FileItem> getFiles() {
+    public List<FileItem> getFiles() {
         return files;
     }
 

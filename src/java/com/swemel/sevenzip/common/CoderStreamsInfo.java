@@ -7,7 +7,7 @@ package com.swemel.sevenzip.common;
  * Time: 17:24:01
  * To change this template use File | Settings | File Templates.
  */
-public class CoderStreamsInfo {
+class CoderStreamsInfo {
     private int NumInStreams;
     private int NumOutStreams;
 

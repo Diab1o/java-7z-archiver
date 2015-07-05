@@ -1,14 +1,7 @@
 package com.swemel.sevenzip;
 
-/**
- * Created by IntelliJ IDEA.
- * User: sokolov_a
- * Date: 04.03.2011
- * Time: 17:38:13
- * To change this template use File | Settings | File Templates.
- */
 public class RefItem implements Comparable {
-    private UpdateItem updateItem;
+    private final UpdateItem updateItem;
     private int index;
     private int extensionPos = 0;
     private int namePos = 0;
@@ -23,38 +16,12 @@ public class RefItem implements Comparable {
 
     private int extensionIndex = 0;
 
-    RefItem(int index, UpdateItem ui, boolean sortByType) {
+    public RefItem(int index, UpdateItem ui) {
         this.updateItem = ui;
         this.index = index;
-        if (sortByType) {
-            int slashPos = GetReverseSlashPos(ui.getName());
-            namePos = ((slashPos >= 0) ? (slashPos + 1) : 0);
-            int dotPos = ui.getName().lastIndexOf('.');
-            if (dotPos < 0 || (dotPos < slashPos && slashPos >= 0))
-                extensionPos = ui.getName().length();
-            else {
-                extensionPos = dotPos + 1;
-                String us = ui.getName().substring(extensionPos);
-                if (!us.isEmpty()) {
-                    us = us.toLowerCase();
-                    int i;
-                    String s = "";
-                    for (i = 0; i < us.length(); i++) {
-                        char c = us.charAt(i);
-                        if (c >= 0x80)
-                            break;
-                        s += c;
-                    }
-                    if (i == us.length())
-                        extensionIndex = GetExtIndex(s);
-                    else
-                        extensionIndex = 0;
-                }
-            }
-        }
     }
 
-    static String g_Exts =
+    private static final String g_Exts =
             " lzma 7z ace arc arj bz bz2 deb lzo lzx gz pak rpm sit tgz tbz tbz2 tgz cab ha lha lzh rar zoo" +
                     " zip jar ear war msi" +
                     " 3gp avi mov mpeg mpg mpe wmv" +
@@ -84,17 +51,17 @@ public class RefItem implements Comparable {
                     " exe dll ocx vbx sfx sys tlb awx com obj lib out o so " +
                     " pdb pch idb ncb opt";
 
-    int GetExtIndex(String ext) {
+    private int getExtIndex(String ext) {
         int extIndex = 1;
         int p = 0;
-        for (; ;) {
+        for (; ; ) {
             char c = g_Exts.charAt(p++);
             if (g_Exts.length() == p)
                 return extIndex;
             if (c == ' ')
                 continue;
             int pos = 0;
-            for (; ;) {
+            for (; ; ) {
 
                 char c2 = ext.charAt(pos++);
                 if (ext.length() == pos && (g_Exts.length() - 1 == p || g_Exts.charAt(p) == ' '))
@@ -104,7 +71,7 @@ public class RefItem implements Comparable {
                 c = g_Exts.charAt(p++);
             }
             extIndex++;
-            for (; ;) {
+            for (; ; ) {
                 if (g_Exts.length() == p)
                     return extIndex;
                 if (c == ' ')
@@ -114,14 +81,14 @@ public class RefItem implements Comparable {
         }
     }
 
-    static int GetReverseSlashPos(String name) {
+    private int getReverseSlashPos(String name) {
         int slashPos = name.lastIndexOf('/');
         int slash1Pos = name.lastIndexOf('\\');
         slashPos = Math.max(slashPos, slash1Pos);
         return slashPos;
     }
 
-    public UpdateItem getUpdateItem() {
+    UpdateItem getUpdateItem() {
         return updateItem;
     }
 

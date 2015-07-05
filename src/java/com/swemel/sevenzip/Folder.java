@@ -2,23 +2,17 @@ package com.swemel.sevenzip;
 
 import com.swemel.sevenzip.common.BindPair;
 
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.List;
 
-/**
- * Created by IntelliJ IDEA.
- * User: sokolov_a
- * Date: 15.02.2011
- * Time: 16:23:40
- * To change this template use File | Settings | File Templates.
- */
 
 public class Folder {
-    private Vector<CoderInfo> coders=new Vector<CoderInfo>();
-    private Vector<BindPair> bindPairs=new Vector<BindPair>();
-    private Vector<Integer> packStreams=new Vector<Integer>();
-    private Vector<Long> unpackSizes=new Vector<Long>();
-    int unpackCRC;
-    boolean unpackCRCDefined=false;
+    private List<CoderInfo> coders = new ArrayList<CoderInfo>();
+    private List<BindPair> bindPairs = new ArrayList<BindPair>();
+    private List<Integer> packStreams = new ArrayList<Integer>();
+    private List<Long> unpackSizes = new ArrayList<Long>();
+    private int unpackCRC;
+    private boolean unpackCRCDefined = false;
 
     public int getUnpackCRC() {
         return unpackCRC;
@@ -36,52 +30,44 @@ public class Folder {
         this.unpackCRCDefined = unpackCRCDefined;
     }
 
-    public void addUnpackSize(long size)
-    {
+    public void addUnpackSize(long size) {
         unpackSizes.add(size);
     }
 
 
-    public Vector<CoderInfo> getCoders() {
+    public List<CoderInfo> getCoders() {
         return coders;
     }
 
-    public void setCoders(Vector<CoderInfo> coders) {
+    public void setCoders(List<CoderInfo> coders) {
         this.coders = coders;
     }
 
-    public Vector<BindPair> getBindPairs() {
+    public List<BindPair> getBindPairs() {
         return bindPairs;
     }
 
-    public void setBindPairs(Vector<BindPair> bindPairs) {
+    public void setBindPairs(List<BindPair> bindPairs) {
         this.bindPairs = bindPairs;
     }
 
-    public Vector<Integer> getPackStreams() {
+    public List<Integer> getPackStreams() {
         return packStreams;
     }
 
-    public void setPackStreams(Vector<Integer> packStreams) {
+    public void setPackStreams(List<Integer> packStreams) {
         this.packStreams = packStreams;
     }
 
-    public Vector<Long> getUnpackSizes() {
+    public List<Long> getUnpackSizes() {
         return unpackSizes;
     }
 
-    public void setUnpackSizes(Vector<Long> unpackSizes) {
+    public void setUnpackSizes(List<Long> unpackSizes) {
         this.unpackSizes = unpackSizes;
     }
 
-    Folder(){
-        coders=new Vector<CoderInfo>();
-        bindPairs=new Vector<BindPair>();
-        packStreams=new Vector<Integer>();
-        unpackSizes=new Vector<Long>();
-    }
-
-    public long getUnpackSize(){
+    public long getUnpackSize() {
         if (unpackSizes.isEmpty())
             return 0;
         for (int i = unpackSizes.size() - 1; i >= 0; i--)
@@ -90,44 +76,39 @@ public class Folder {
         throw new UnknownError("1");
     }
 
-    public int getNumOutStreams(){
+    public int getNumOutStreams() {
         int result = 0;
-        for (int i = 0; i < coders.size(); i++)
-            result += coders.get(i).getNumOutStreams();
+        for (CoderInfo coder : coders) {
+            result += coder.getNumOutStreams();
+        }
         return result;
     }
 
-    public int findBindPairForInStream(int inStreamIndex)
-    {
+    public int findBindPairForInStream(int inStreamIndex) {
         for (int i = 0; i < bindPairs.size(); i++)
             if (bindPairs.get(i).getInIndex() == inStreamIndex)
                 return i;
         return -1;
     }
 
-    public int findBindPairForOutStream(int outStreamIndex)
-    {
+    int findBindPairForOutStream(int outStreamIndex) {
         for (int i = 0; i < bindPairs.size(); i++)
             if (bindPairs.get(i).getOutIndex() == outStreamIndex)
                 return i;
         return -1;
     }
 
-    public int findPackStreamArrayIndex(int inStreamIndex)
-    {
+    public int findPackStreamArrayIndex(int inStreamIndex) {
         for (int i = 0; i < packStreams.size(); i++)
             if (packStreams.get(i) == inStreamIndex)
                 return i;
         return -1;
     }
 
-    public boolean isEncrypted()
-    {
+    public boolean isEncrypted() {
         for (int i = coders.size() - 1; i >= 0; i--)
             if (coders.get(i).getMethodID() == 0x06F10701)
                 return true;
         return false;
     }
-
-    //boolean CheckStructure();   todo ?
 }

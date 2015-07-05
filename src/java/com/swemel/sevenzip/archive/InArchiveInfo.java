@@ -9,7 +9,7 @@ import java.util.Vector;
  * Time: 18:17:29
  * To change this template use File | Settings | File Templates.
  */
-public class InArchiveInfo {
+class InArchiveInfo {
     public byte ArchiveVersion_Major;
     public byte ArchiveVersion_Minor;
 
@@ -17,10 +17,9 @@ public class InArchiveInfo {
     public long StartPositionAfterHeader;
     public long DataStartPosition;
     public long DataStartPosition2;
-    Vector<Long> FileInfoPopIDs = new Vector<Long>();
+    private final Vector<Long> FileInfoPopIDs = new Vector<Long>();
 
-    void Clear()
-    {
+    void Clear() {
         FileInfoPopIDs.clear();
     }
 }

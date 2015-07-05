@@ -11,7 +11,7 @@ import com.swemel.common.ByteBuffer;
  */
 public class CoderInfo {
     private long methodID;
-    ByteBuffer props;
+    private ByteBuffer props;
     private int numInStreams;
     private int numOutStreams;
 

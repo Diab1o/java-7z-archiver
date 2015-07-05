@@ -2,8 +2,7 @@ package com.swemel.sevenzip.compression.rangecoder;
 
 import java.io.IOException;
 
-public class Encoder
-{
+public class Encoder {
     private static final int kTopMask = ~((1 << 24) - 1);
 
     private static final int kNumBitModelTotalBits = 11;
@@ -19,18 +18,15 @@ public class Encoder
 
     private long _position;
 
-    public void setStream(java.io.OutputStream stream)
-    {
+    public void setStream(java.io.OutputStream stream) {
         Stream = stream;
     }
 
-    public void releaseStream()
-    {
+    public void releaseStream() {
         Stream = null;
     }
 
-    public void init()
-    {
+    public void init() {
         _position = 0;
         Low = 0;
         Range = -1;
@@ -38,28 +34,22 @@ public class Encoder
         _cache = 0;
     }
 
-    public void flushData() throws IOException
-    {
-        for (int i = 0; i < 5; i++)
-        {
+    public void flushData() throws IOException {
+        for (int i = 0; i < 5; i++) {
             shiftLow();
         }
     }
 
-    public void flushStream() throws IOException
-    {
+    public void flushStream() throws IOException {
         Stream.flush();
     }
 
-    void shiftLow() throws IOException
-    {
+    void shiftLow() throws IOException {
         int LowHi = (int) (Low >>> 32);
-        if (LowHi != 0 || Low < 0xFF000000L)
-        {
+        if (LowHi != 0 || Low < 0xFF000000L) {
             _position += _cacheSize;
             int temp = _cache;
-            do
-            {
+            do {
                 Stream.write(temp + LowHi);
                 temp = 0xFF;
             }
@@ -70,17 +60,13 @@ public class Encoder
         Low = (Low & 0xFFFFFF) << 8;
     }
 
-    public void encodeDirectBits(int v, int numTotalBits) throws IOException
-    {
-        for (int i = numTotalBits - 1; i >= 0; i--)
-        {
+    public void encodeDirectBits(int v, int numTotalBits) throws IOException {
+        for (int i = numTotalBits - 1; i >= 0; i--) {
             Range >>>= 1;
-            if (((v >>> i) & 1) == 1)
-            {
+            if (((v >>> i) & 1) == 1) {
                 Low += Range;
             }
-            if ((Range & Encoder.kTopMask) == 0)
-            {
+            if ((Range & Encoder.kTopMask) == 0) {
                 Range <<= 8;
                 shiftLow();
             }
@@ -88,8 +74,7 @@ public class Encoder
     }
 
 
-    public long getProcessedSizeAdd()
-    {
+    public long getProcessedSizeAdd() {
         return _cacheSize + _position + 4;
     }
 
@@ -97,32 +82,25 @@ public class Encoder
     private static final int kNumMoveReducingBits = 2;
     public static final int kNumBitPriceShiftBits = 6;
 
-    public static void initBitModels(short[] probs)
-    {
-        for (int i = 0; i < probs.length; i++)
-        {
+    public static void initBitModels(short[] probs) {
+        for (int i = 0; i < probs.length; i++) {
             probs[i] = (kBitModelTotal >>> 1);
         }
     }
 
-    public void encode(short[] probs, int index, int symbol) throws IOException
-    {
+    public void encode(short[] probs, int index, int symbol) throws IOException {
 
         int prob = probs[index];
         int newBound = (Range >>> kNumBitModelTotalBits) * prob;
-        if (symbol == 0)
-        {
+        if (symbol == 0) {
             Range = newBound;
             probs[index] = (short) (prob + ((kBitModelTotal - prob) >>> kNumMoveBits));
-        }
-        else
-        {
+        } else {
             Low += (newBound & 0xFFFFFFFFL);
             Range -= newBound;
             probs[index] = (short) (prob - ((prob) >>> kNumMoveBits));
         }
-        if ((Range & kTopMask) == 0)
-        {
+        if ((Range & kTopMask) == 0) {
             Range <<= 8;
             shiftLow();
         }
@@ -130,33 +108,27 @@ public class Encoder
 
     private static final int[] ProbPrices = new int[kBitModelTotal >>> kNumMoveReducingBits];
 
-    static
-    {
+    static {
         int kNumBits = (kNumBitModelTotalBits - kNumMoveReducingBits);
-        for (int i = kNumBits - 1; i >= 0; i--)
-        {
+        for (int i = kNumBits - 1; i >= 0; i--) {
             int start = 1 << (kNumBits - i - 1);
             int end = 1 << (kNumBits - i);
-            for (int j = start; j < end; j++)
-            {
+            for (int j = start; j < end; j++) {
                 ProbPrices[j] = (i << kNumBitPriceShiftBits) +
                         (((end - j) << kNumBitPriceShiftBits) >>> (kNumBits - i - 1));
             }
         }
     }
 
-    static public int getPrice(int Prob, int symbol)
-    {
+    static public int getPrice(int Prob, int symbol) {
         return ProbPrices[(((Prob - symbol) ^ ((-symbol))) & (kBitModelTotal - 1)) >>> kNumMoveReducingBits];
     }
 
-    static public int getPrice0(int Prob)
-    {
+    static public int getPrice0(int Prob) {
         return ProbPrices[Prob >>> kNumMoveReducingBits];
     }
 
-    static public int getPrice1(int Prob)
-    {
+    static public int getPrice1(int Prob) {
         return ProbPrices[(kBitModelTotal - Prob) >>> kNumMoveReducingBits];
     }
 }

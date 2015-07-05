@@ -1,183 +1,171 @@
 package com.swemel.sevenzip;
 
-/**
- * Created by IntelliJ IDEA.
- * User: sokolov_a
- * Date: 17.02.2011
- * Time: 17:42:54
- * To change this template use File | Settings | File Templates.
- */
+
 public class UpdateItem {
 
-    private int IndexInArchive;
-    private int IndexInClient;
+    private int indexInArchive;
+    private int indexInClient;
 
-    private long CTime;
-    private long ATime;
-    private long MTime;
+    private long cTime;
+    private long aTime;
+    private long mTime;
 
-    private long Size;
-    private String Name;
+    private long size;
+    private String name;
 
     public String getFullName() {
-        return FullName;
+        return fullName;
     }
 
     public void setFullName(String fullName) {
-        FullName = fullName;
+        this.fullName = fullName;
     }
 
-    private String FullName;
+    private String fullName;
 
-    private int Attrib;
+    private int attrib;
 
-    private boolean NewData;
-    private boolean NewProps;
+    private boolean newData;
+    private boolean newProps;
 
-    private boolean IsAnti = false;
-    private boolean IsDir = false;
+    private boolean isAnti = false;
+    private boolean isDir = false;
 
-    private boolean AttribDefined = false;
-    private boolean CTimeDefined = false;
-    private boolean ATimeDefined = false;
-    private boolean MTimeDefined = false;
+    private boolean attribDefined = false;
+    private boolean cTimeDefined = false;
+    private boolean aTimeDefined = false;
+    private boolean mTimeDefined = false;
 
     public int getIndexInArchive() {
-        return IndexInArchive;
+        return indexInArchive;
     }
 
     public void setIndexInArchive(int indexInArchive) {
-        IndexInArchive = indexInArchive;
+        this.indexInArchive = indexInArchive;
     }
 
     public int getIndexInClient() {
-        return IndexInClient;
+        return indexInClient;
     }
 
     public void setIndexInClient(int indexInClient) {
-        IndexInClient = indexInClient;
+        this.indexInClient = indexInClient;
     }
 
-    public long getCTime() {
-        return CTime;
+    public long getcTime() {
+        return cTime;
     }
 
-    public void setCTime(long CTime) {
-        this.CTime = CTime;
+    public void setcTime(long cTime) {
+        this.cTime = cTime;
     }
 
-    public long getATime() {
-        return ATime;
+    public long getaTime() {
+        return aTime;
     }
 
-    public void setATime(long ATime) {
-        this.ATime = ATime;
+    public void setaTime(long aTime) {
+        this.aTime = aTime;
     }
 
-    public long getMTime() {
-        return MTime;
+    public long getmTime() {
+        return mTime;
     }
 
-    public void setMTime(long MTime) {
-        this.MTime = MTime;
+    public void setmTime(long mTime) {
+        this.mTime = mTime;
     }
 
     public long getSize() {
-        return Size;
+        return size;
     }
 
     public void setSize(long size) {
-        Size = size;
+        this.size = size;
     }
 
     public String getName() {
-        return Name;
+        return name;
     }
 
     public void setName(String name) {
-        Name = name;
+        this.name = name;
     }
 
     public int getAttrib() {
-        return Attrib;
+        return attrib;
     }
 
     public void setAttrib(int attrib) {
-        Attrib = attrib;
+        this.attrib = attrib;
     }
 
     public boolean isNewData() {
-        return NewData;
+        return newData;
     }
 
     public void setNewData(boolean newData) {
-        NewData = newData;
+        this.newData = newData;
     }
 
     public boolean isNewProps() {
-        return NewProps;
+        return newProps;
     }
 
     public void setNewProps(boolean newProps) {
-        NewProps = newProps;
+        this.newProps = newProps;
     }
 
     public boolean isAnti() {
-        return IsAnti;
+        return isAnti;
     }
 
     public void setIsAnti(boolean isAnti) {
-        IsAnti = isAnti;
+        this.isAnti = isAnti;
     }
 
     public boolean isDir() {
-        return IsDir;
+        return isDir;
     }
 
     public void setIsDir(boolean isDir) {
-        IsDir = isDir;
+        this.isDir = isDir;
     }
 
     public boolean isAttribDefined() {
-        return AttribDefined;
+        return attribDefined;
     }
 
     public void setAttribDefined(boolean attribDefined) {
-        AttribDefined = attribDefined;
+        this.attribDefined = attribDefined;
     }
 
-    public boolean isCTimeDefined() {
-        return CTimeDefined;
+    public boolean iscTimeDefined() {
+        return cTimeDefined;
     }
 
-    public void setCTimeDefined(boolean CTimeDefined) {
-        this.CTimeDefined = CTimeDefined;
+    public void setcTimeDefined(boolean cTimeDefined) {
+        this.cTimeDefined = cTimeDefined;
     }
 
-    public boolean isATimeDefined() {
-        return ATimeDefined;
+    public boolean isaTimeDefined() {
+        return aTimeDefined;
     }
 
-    public void setATimeDefined(boolean ATimeDefined) {
-        this.ATimeDefined = ATimeDefined;
+    public void setaTimeDefined(boolean aTimeDefined) {
+        this.aTimeDefined = aTimeDefined;
     }
 
-    public boolean isMTimeDefined() {
-        return MTimeDefined;
+    public boolean ismTimeDefined() {
+        return mTimeDefined;
     }
 
-    public void setMTimeDefined(boolean MTimeDefined) {
-        this.MTimeDefined = MTimeDefined;
+    public void setmTimeDefined(boolean mTimeDefined) {
+        this.mTimeDefined = mTimeDefined;
     }
 
     public boolean hasStream() {
-        return !IsDir && !IsAnti && Size != 0;
+        return !isDir && !isAnti && size != 0;
     }
-
-    UpdateItem() {
-
-    }
-
-
 
 }

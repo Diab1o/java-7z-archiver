@@ -9,9 +9,9 @@ import java.util.Vector;
  * Time: 18:30:34
  * To change this template use File | Settings | File Templates.
  */
-public class Method {
-    long id;
-    Vector<Prop> props;
+class Method {
+    private long id;
+    private Vector<Prop> props;
 
     public long getId() {
         return id;

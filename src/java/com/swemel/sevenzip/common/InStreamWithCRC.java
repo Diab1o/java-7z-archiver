@@ -13,12 +13,12 @@ import java.io.*;
  */
 public class InStreamWithCRC extends InputStream {
 
-    RandomAccessFile _stream;
-    static public final int STREAM_SEEK_SET = 0;
-    static public final int STREAM_SEEK_CUR = 1;
-    long _size;
-    boolean _wasFinished;
-    CRC _crc = new CRC();
+    private RandomAccessFile _stream;
+    private static final int STREAM_SEEK_SET = 0;
+    private static final int STREAM_SEEK_CUR = 1;
+    private long _size;
+    private boolean _wasFinished;
+    private final CRC _crc = new CRC();
 
 
     public InStreamWithCRC(File file) throws FileNotFoundException {
@@ -36,7 +36,7 @@ public class InStreamWithCRC extends InputStream {
 
     public long seek(int offset, int seekOrigin) throws IOException {
         _size = 0;
-        _crc.Init();
+        _crc.init();
         if (seekOrigin == STREAM_SEEK_SET) {
             _stream.seek(offset);
         } else if (seekOrigin == STREAM_SEEK_CUR) {
@@ -49,7 +49,7 @@ public class InStreamWithCRC extends InputStream {
     @Override
     public int read() throws IOException {
         int ret = _stream.read();
-        _crc.UpdateByte((byte) ret);
+        _crc.updateByte((byte) ret);
         _size++;
         return ret;
     }
@@ -57,7 +57,7 @@ public class InStreamWithCRC extends InputStream {
     @Override
     public int read(byte[] b) throws IOException {
         int ret = _stream.read(b);
-        _crc.Update(b, ret);
+        _crc.update(b, ret);
         _size += ret;
         return ret;
     }
@@ -65,7 +65,7 @@ public class InStreamWithCRC extends InputStream {
     @Override
     public int read(byte[] b, int off, int len) throws IOException {
         int ret = _stream.read(b, off, len);
-        _crc.Update(b, off, ret);
+        _crc.update(b, off, ret);
         _size += ret;
         return ret;
     }
@@ -73,7 +73,7 @@ public class InStreamWithCRC extends InputStream {
     public void init() {
         _size = 0;
         _wasFinished = false;
-        _crc.Init();
+        _crc.init();
     }
 
     public long getSize() {
@@ -85,6 +85,6 @@ public class InStreamWithCRC extends InputStream {
     }
 
     public int getCrc() {
-        return _crc.GetDigest();
+        return _crc.getDigest();
     }
 }

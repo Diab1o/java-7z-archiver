@@ -29,46 +29,33 @@
 
 package com.swemel.sevenzip.compression.lzma;
 
-public class Base
-{
+class Base {
     public static final int kNumRepDistances = 4;
     public static final int kNumStates = 12;
 
-    public static int stateInit()
-    {
-        return 0;
-    }
-
-    public static int stateUpdateChar(int index)
-    {
-        if (index < 4)
-        {
+    public static int stateUpdateChar(int index) {
+        if (index < 4) {
             return 0;
         }
-        if (index < 10)
-        {
+        if (index < 10) {
             return index - 3;
         }
         return index - 6;
     }
 
-    public static int stateUpdateMatch(int index)
-    {
+    public static int stateUpdateMatch(int index) {
         return (index < 7 ? 7 : 10);
     }
 
-    public static int stateUpdateRep(int index)
-    {
+    public static int stateUpdateRep(int index) {
         return (index < 7 ? 8 : 11);
     }
 
-    public static int stateUpdateShortRep(int index)
-    {
+    public static int stateUpdateShortRep(int index) {
         return (index < 7 ? 9 : 11);
     }
 
-    public static boolean stateIsCharState(int index)
-    {
+    public static boolean stateIsCharState(int index) {
         return index < 7;
     }
 
@@ -81,11 +68,9 @@ public class Base
 
     public static final int kMatchMinLen = 2;
 
-    public static int getLenToPosState(int len)
-    {
+    public static int getLenToPosState(int len) {
         len -= kMatchMinLen;
-        if (len < kNumLenToPosStates)
-        {
+        if (len < kNumLenToPosStates) {
             return len;
         }
         return kNumLenToPosStates - 1;

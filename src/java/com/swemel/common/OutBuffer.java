@@ -3,24 +3,17 @@ package com.swemel.common;
 import java.io.IOException;
 import java.io.OutputStream;
 
-/**
- * Created by IntelliJ IDEA.
- * User: Diablo
- * Date: 21.03.2011
- * Time: 17:09:08
- * To change this template use File | Settings | File Templates.
- */
 public class OutBuffer {
-    byte[] _buffer;
-    int _pos;
-    int _limitPos;
-    int _streamPos;
-    int _bufferSize;
-    OutputStream _stream;
-    long _processedSize;
-    byte[] _buffer2;
-    int _buffer2Pointer = 0;
-    boolean _overDict;
+    private byte[] _buffer;
+    private int _pos;
+    private int _limitPos;
+    private int _streamPos;
+    private int _bufferSize;
+    private OutputStream _stream;
+    private long _processedSize;
+    private byte[] _buffer2;
+    private int _buffer2Pointer = 0;
+    private boolean _overDict;
 
     public void setStream(OutputStream _stream) {
         this._stream = _stream;
@@ -62,7 +55,7 @@ public class OutBuffer {
             writeByte(data[i]);
     }
 
-    public void flushPart() throws IOException {
+    void flushPart() throws IOException {
         // _streamPos < _bufferSize
         int size = (_streamPos >= _pos) ? (_bufferSize - _streamPos) : (_pos - _streamPos);
         boolean result = true;
@@ -91,7 +84,7 @@ public class OutBuffer {
         }
     }
 
-    public void flushWithCheck() throws IOException {
+    void flushWithCheck() throws IOException {
         flush();
     }
 }

@@ -7,6 +7,6 @@ package com.swemel.sevenzip.common;
  * Time: 18:31:20
  * To change this template use File | Settings | File Templates.
  */
-public class Prop {
+class Prop {
     long id;
 }

@@ -2,86 +2,79 @@
 
 package com.swemel.sevenzip;
 
-public class CRC
-{
-	static public int[] Table = new int[256];
+public class CRC {
+    private static final int[] table = new int[256];
 
-	static
-	{
-		for (int i = 0; i < 256; i++)
-		{
-			int r = i;
-			for (int j = 0; j < 8; j++)
-				if ((r & 1) != 0)
-					r = (r >>> 1) ^ 0xEDB88320;
-				else
-					r >>>= 1;
-			Table[i] = r;
-		}
-	}
+    static {
+        for (int i = 0; i < 256; i++) {
+            int r = i;
+            for (int j = 0; j < 8; j++)
+                if ((r & 1) != 0)
+                    r = (r >>> 1) ^ 0xEDB88320;
+                else
+                    r >>>= 1;
+            table[i] = r;
+        }
+    }
 
-	int _value = -1;
+    private int _value = -1;
 
-	public void Init()
-	{
-		_value = -1;
-	}
+    public void init() {
+        _value = -1;
+    }
 
-    public void UpdateUInt32(int v) {
+    public void updateUInt32(int v) {
         for (int i = 0; i < 4; i++)
-            UpdateByte((byte) ((v >> (8 * i)) & 0xFF));
+            updateByte((byte) ((v >> (8 * i)) & 0xFF));
     }
 
-    public void UpdateUInt64(long v) {
+    public void updateUInt64(long v) {
         for (int i = 0; i < 8; i++)
-            UpdateByte((byte) ((byte)((v >> (8 * i))) & 0xFF));
+            updateByte((byte) ((byte) ((v >> (8 * i))) & 0xFF));
     }
 
-	public void Update(byte[] data, int offset, int size)
-	{
-		for (int i = 0; i < size; i++)
-			_value = Table[(_value ^ data[offset + i]) & 0xFF] ^ (_value >>> 8);
-	}
-
-	public void Update(byte[] data)
-	{
-		int size = data.length;
-		for (int i = 0; i < size; i++)
-			_value = Table[(_value ^ data[i]) & 0xFF] ^ (_value >>> 8);
-	}
-
-	public void UpdateByte(byte b)
-	{
-		_value = Table[(_value ^ b) & 0xFF] ^ (_value >>> 8);
-	}
-    public void UpdateByte(int b)
-	{
-		_value = Table[(_value ^ b) & 0xFF] ^ (_value >>> 8);
-	}
-
-    public void Update(byte[] data, int size) {
+    public void update(byte[] data, int offset, int size) {
         for (int i = 0; i < size; i++)
-            _value = Table[(_value ^ data[i]) & 0xFF] ^ (_value >>> 8);
+            _value = table[(_value ^ data[offset + i]) & 0xFF] ^ (_value >>> 8);
     }
 
-	public int GetDigest()
-	{
-		return _value ^ (-1);
-	}
+    public void Update(byte[] data) {
+        int size = data.length;
+        for (byte aData : data) {
+            _value = table[(_value ^ aData) & 0xFF] ^ (_value >>> 8);
+        }
+    }
 
-    public static int CalculateDigest(byte [] data, int size) {
+    public void updateByte(byte b) {
+        _value = table[(_value ^ b) & 0xFF] ^ (_value >>> 8);
+    }
+
+    public void updateByte(int b) {
+        _value = table[(_value ^ b) & 0xFF] ^ (_value >>> 8);
+    }
+
+    public void update(byte[] data, int size) {
+        for (int i = 0; i < size; i++)
+            _value = table[(_value ^ data[i]) & 0xFF] ^ (_value >>> 8);
+    }
+
+    public int getDigest() {
+        return ~_value;
+    }
+
+    public static int calculateDigest(byte[] data, int size) {
         CRC crc = new CRC();
-        crc.Update(data, size);
-        return crc.GetDigest();
+        crc.update(data, size);
+        return crc.getDigest();
     }
 
-    public static int CalculateDigest(byte [] data, int offset, int size) {
+    public static int calculateDigest(byte[] data, int offset, int size) {
         CRC crc = new CRC();
-        crc.Update(data, offset, size);
-        return crc.GetDigest();
+        crc.update(data, offset, size);
+        return crc.getDigest();
     }
 
-    static public boolean VerifyDigest(int digest, byte [] data, int size) {
-        return (CalculateDigest(data, size) == digest);
+    static public boolean verifyDigest(int digest, byte[] data, int size) {
+        return (calculateDigest(data, size) == digest);
     }
 }

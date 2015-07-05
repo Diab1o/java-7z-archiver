@@ -7,14 +7,12 @@ package com.swemel.sevenzip.archive;
  * Time: 17:59:16
  * To change this template use File | Settings | File Templates.
  */
-public class Header
-{
+class Header {
     public static final int kSignatureSize = 6;
-    public static byte [] kSignature= {'7', 'z', (byte)0xBC, (byte)0xAF, 0x27, 0x1C};
+    public static byte[] kSignature = {'7', 'z', (byte) 0xBC, (byte) 0xAF, 0x27, 0x1C};
     public static byte kMajorVersion = 0;
 
-    public class NID
-    {
+    public class NID {
         public static final int kEnd = 0;
         public static final int kHeader = 1;
         public static final int kArchiveProperties = 2;

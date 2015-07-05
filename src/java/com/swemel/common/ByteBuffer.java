@@ -1,47 +1,39 @@
 package com.swemel.common;
 
-/**
- * Created by IntelliJ IDEA.
- * User: sokolov_a
- * Date: 24.02.2011
- * Time: 18:06:20
- * To change this template use File | Settings | File Templates.
- */
+
 public class ByteBuffer {
-    int _capacity;
-    byte[] _items;
+    private int capacity;
+    private byte[] items;
 
     public ByteBuffer() {
-        _capacity = 0;
-        _items = null;
+        capacity = 0;
+        items = null;
     }
 
     public byte[] data() {
-        return _items;
+        return items;
     }
 
-    public int GetCapacity() {
-        return _capacity;
+    public int getCapacity() {
+        return capacity;
     }
 
     public void setCapacity(int newCapacity) {
-        if (newCapacity == _capacity)
+        if (newCapacity == capacity) {
             return;
-
+        }
         byte[] newBuffer;
         if (newCapacity > 0) {
             newBuffer = new byte[newCapacity];
-            if (_capacity > 0) {
-                int len = _capacity;
+            if (capacity > 0) {
+                int len = capacity;
                 if (newCapacity < len) len = newCapacity;
-
-                System.arraycopy(_items, 0, newBuffer, 0, len); // for (int i = 0 ; i < len ; i++) newBuffer[i] = _items[i];
+                System.arraycopy(items, 0, newBuffer, 0, len);
             }
         } else
             newBuffer = null;
 
-        // delete []_items;
-        _items = newBuffer;
-        _capacity = newCapacity;
+        items = newBuffer;
+        capacity = newCapacity;
     }
 }

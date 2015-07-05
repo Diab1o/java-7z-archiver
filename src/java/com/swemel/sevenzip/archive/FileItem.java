@@ -41,6 +41,7 @@ public class FileItem {
     public void setSize(long size) {
         this.size = size;
     }
+
     // public boolean IsCreationTimeDefined; replace by (CreationTime != 0)
     // public boolean IsLastWriteTimeDefined; replace by (LastWriteTime != 0)
     // public boolean IsLastAccessTimeDefined; replace by (LastAccessTime != 0)
