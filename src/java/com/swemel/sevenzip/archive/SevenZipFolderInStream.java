@@ -1,6 +1,5 @@
 package com.swemel.sevenzip.archive;
 
-import com.swemel.sevenzip.RefItem;
 import com.swemel.sevenzip.UpdateItem;
 import com.swemel.sevenzip.common.InStreamWithCRC;
 
@@ -19,7 +18,6 @@ public class SevenZipFolderInStream extends InputStream {
     private int _numFiles;
     private int _fileIndex;
     private int off;
-    private long size = 0;
 
     private final List<Integer> CRCs = new ArrayList<>();
     private final List<Long> sizes = new ArrayList<>();
@@ -30,22 +28,17 @@ public class SevenZipFolderInStream extends InputStream {
         _numFiles = numFiles;
         _fileIndex = 0;
         this.off = off;
-        CRCs.clear();
-        sizes.clear();
         _fileIsOpen = false;
-        size = 0;
     }
 
     void openStream() throws FileNotFoundException {
         _filePos = 0;
         while (_fileIndex < _numFiles) {
             stream = new InStreamWithCRC(updateItems.get(off + _fileIndex).getFullName());
-
             _fileIndex++;
             stream.init();
             if (stream != null) {
                 _fileIsOpen = true;
-
                 return;
             }
             sizes.add(0L);
@@ -87,7 +80,6 @@ public class SevenZipFolderInStream extends InputStream {
                     continue;
                 }
                 processedSize = processed2;
-                size += processed2;
                 _filePos += processed2;
                 break;
             }

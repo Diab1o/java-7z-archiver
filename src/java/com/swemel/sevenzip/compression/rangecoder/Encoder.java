@@ -13,10 +13,10 @@ public class Encoder {
 
     private long Low;
     private int Range;
-    private int _cacheSize;
+    private int cacheSize;
     private int _cache;
 
-    private long _position;
+    private long position;
 
     public void setStream(java.io.OutputStream stream) {
         Stream = stream;
@@ -27,10 +27,10 @@ public class Encoder {
     }
 
     public void init() {
-        _position = 0;
+        position = 0;
         Low = 0;
         Range = -1;
-        _cacheSize = 1;
+        cacheSize = 1;
         _cache = 0;
     }
 
@@ -47,16 +47,16 @@ public class Encoder {
     void shiftLow() throws IOException {
         int LowHi = (int) (Low >>> 32);
         if (LowHi != 0 || Low < 0xFF000000L) {
-            _position += _cacheSize;
+            position += cacheSize;
             int temp = _cache;
             do {
                 Stream.write(temp + LowHi);
                 temp = 0xFF;
             }
-            while (--_cacheSize != 0);
+            while (--cacheSize != 0);
             _cache = (((int) Low) >>> 24);
         }
-        _cacheSize++;
+        cacheSize++;
         Low = (Low & 0xFFFFFF) << 8;
     }
 
@@ -75,7 +75,7 @@ public class Encoder {
 
 
     public long getProcessedSizeAdd() {
-        return _cacheSize + _position + 4;
+        return cacheSize + position + 4;
     }
 
 

@@ -11,9 +11,6 @@ public class OutBuffer {
     private int _bufferSize;
     private OutputStream _stream;
     private long _processedSize;
-    private byte[] _buffer2;
-    private int _buffer2Pointer = 0;
-    private boolean _overDict;
 
     public void setStream(OutputStream _stream) {
         this._stream = _stream;
@@ -34,7 +31,6 @@ public class OutBuffer {
         _limitPos = _bufferSize;
         _pos = 0;
         _processedSize = 0;
-        _overDict = false;
     }
 
     public long getProcessedSize() {
@@ -56,13 +52,7 @@ public class OutBuffer {
     }
 
     void flushPart() throws IOException {
-        // _streamPos < _bufferSize
         int size = (_streamPos >= _pos) ? (_bufferSize - _streamPos) : (_pos - _streamPos);
-        boolean result = true;
-        if (_buffer2 != null) {
-            System.arraycopy(_buffer, _streamPos, _buffer2, _buffer2Pointer, size);
-            _buffer2Pointer += size;
-        }
 
         if (_stream != null) {
             _stream.write(_buffer, _streamPos, size);
@@ -71,7 +61,6 @@ public class OutBuffer {
         if (_streamPos == _bufferSize)
             _streamPos = 0;
         if (_pos == _bufferSize) {
-            _overDict = true;
             _pos = 0;
         }
         _limitPos = (_streamPos > _pos) ? _streamPos : _bufferSize;

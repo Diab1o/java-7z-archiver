@@ -2,71 +2,22 @@ package com.swemel.sevenzip;
 
 
 public class UpdateItem {
-
-    private int indexInArchive;
-    private int indexInClient;
-
-    private long cTime;
-    private long aTime;
     private long mTime;
 
     private long size;
     private String name;
-
-    public String getFullName() {
-        return fullName;
-    }
-
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
-    }
 
     private String fullName;
 
     private int attrib;
 
     private boolean newData;
-    private boolean newProps;
 
     private boolean isAnti = false;
     private boolean isDir = false;
 
     private boolean attribDefined = false;
-    private boolean cTimeDefined = false;
-    private boolean aTimeDefined = false;
     private boolean mTimeDefined = false;
-
-    public int getIndexInArchive() {
-        return indexInArchive;
-    }
-
-    public void setIndexInArchive(int indexInArchive) {
-        this.indexInArchive = indexInArchive;
-    }
-
-    public int getIndexInClient() {
-        return indexInClient;
-    }
-
-    public void setIndexInClient(int indexInClient) {
-        this.indexInClient = indexInClient;
-    }
-
-    public long getcTime() {
-        return cTime;
-    }
-
-    public void setcTime(long cTime) {
-        this.cTime = cTime;
-    }
-
-    public long getaTime() {
-        return aTime;
-    }
-
-    public void setaTime(long aTime) {
-        this.aTime = aTime;
-    }
 
     public long getmTime() {
         return mTime;
@@ -108,14 +59,6 @@ public class UpdateItem {
         this.newData = newData;
     }
 
-    public boolean isNewProps() {
-        return newProps;
-    }
-
-    public void setNewProps(boolean newProps) {
-        this.newProps = newProps;
-    }
-
     public boolean isAnti() {
         return isAnti;
     }
@@ -140,22 +83,6 @@ public class UpdateItem {
         this.attribDefined = attribDefined;
     }
 
-    public boolean iscTimeDefined() {
-        return cTimeDefined;
-    }
-
-    public void setcTimeDefined(boolean cTimeDefined) {
-        this.cTimeDefined = cTimeDefined;
-    }
-
-    public boolean isaTimeDefined() {
-        return aTimeDefined;
-    }
-
-    public void setaTimeDefined(boolean aTimeDefined) {
-        this.aTimeDefined = aTimeDefined;
-    }
-
     public boolean ismTimeDefined() {
         return mTimeDefined;
     }
@@ -166,6 +93,14 @@ public class UpdateItem {
 
     public boolean hasStream() {
         return !isDir && !isAnti && size != 0;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
 
 }

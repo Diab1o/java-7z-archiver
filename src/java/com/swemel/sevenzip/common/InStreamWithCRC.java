@@ -4,87 +4,68 @@ import com.swemel.sevenzip.CRC;
 
 import java.io.*;
 
-/**
- * Created by IntelliJ IDEA.
- * User: sokolov_a
- * Date: 18.04.2011
- * Time: 16:55:02
- * To change this template use File | Settings | File Templates.
- */
 public class InStreamWithCRC extends InputStream {
 
-    private RandomAccessFile _stream;
+    private RandomAccessFile stream;
     private static final int STREAM_SEEK_SET = 0;
     private static final int STREAM_SEEK_CUR = 1;
-    private long _size;
-    private boolean _wasFinished;
-    private final CRC _crc = new CRC();
-
-
-    public InStreamWithCRC(File file) throws FileNotFoundException {
-        _stream = new RandomAccessFile(file, "r");
-    }
+    private long size;
+    private final CRC crc = new CRC();
 
     public InStreamWithCRC(String fileName) throws FileNotFoundException {
-        _stream = new RandomAccessFile(new File(fileName), "r");
-    }
-
-
-    public void setStream(RandomAccessFile stream) {
-        this._stream = stream;
+        stream = new RandomAccessFile(new File(fileName), "r");
     }
 
     public long seek(int offset, int seekOrigin) throws IOException {
-        _size = 0;
-        _crc.init();
+        size = 0;
+        crc.init();
         if (seekOrigin == STREAM_SEEK_SET) {
-            _stream.seek(offset);
+            stream.seek(offset);
         } else if (seekOrigin == STREAM_SEEK_CUR) {
-            _stream.seek(offset + _stream.getFilePointer());
+            stream.seek(offset + stream.getFilePointer());
         }
-        return _stream.getFilePointer();
+        return stream.getFilePointer();
     }
 
 
     @Override
     public int read() throws IOException {
-        int ret = _stream.read();
-        _crc.updateByte((byte) ret);
-        _size++;
+        int ret = stream.read();
+        crc.updateByte((byte) ret);
+        size++;
         return ret;
     }
 
     @Override
     public int read(byte[] b) throws IOException {
-        int ret = _stream.read(b);
-        _crc.update(b, ret);
-        _size += ret;
+        int ret = stream.read(b);
+        crc.update(b, ret);
+        size += ret;
         return ret;
     }
 
     @Override
     public int read(byte[] b, int off, int len) throws IOException {
-        int ret = _stream.read(b, off, len);
-        _crc.update(b, off, ret);
-        _size += ret;
+        int ret = stream.read(b, off, len);
+        crc.update(b, off, ret);
+        size += ret;
         return ret;
     }
 
     public void init() {
-        _size = 0;
-        _wasFinished = false;
-        _crc.init();
+        size = 0;
+        crc.init();
     }
 
     public long getSize() {
-        return _size;
+        return size;
     }
 
     public void releaseStream() throws IOException {
-        _stream.close();
+        stream.close();
     }
 
     public int getCrc() {
-        return _crc.getDigest();
+        return crc.getDigest();
     }
 }

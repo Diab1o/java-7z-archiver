@@ -18,31 +18,29 @@ import java.util.List;
 
 public class SevenZip {
     private final List<UpdateItem> updateItems = new ArrayList<>();
-    private int currentIndex = 0;
+    private final List<UpdateItem> emptyRefs = new ArrayList<>();
     private RandomAccessOutputStream outStream;
 
-    private void collectFiles(File... files) {
+    private void collectFiles(String path, File... files) {
         for (File file : files) {
             if (!file.canRead()) {
                 System.err.println("Can't read from file:" + file.getAbsolutePath());
                 continue;
             }
-
-            int indexInArchive = -1;
             UpdateItem ui = new UpdateItem();
-            ui.setNewProps(true);
             ui.setNewData(true);
-            ui.setIndexInArchive(indexInArchive);
-            ui.setIndexInClient(currentIndex++);
             ui.setIsAnti(false);
             ui.setSize(0);
-            ui.setaTimeDefined(false);
             ui.setmTime(file.lastModified());
             ui.setmTimeDefined(file.lastModified() != 0L);
             ui.setmTimeDefined(true);
-            ui.setaTimeDefined(false);
-            ui.setcTimeDefined(false);
-            ui.setName(file.getName());
+            String childName;
+            if (!path.isEmpty()) {
+                childName = path + File.separator + file.getName();
+            } else {
+                childName = file.getName();
+            }
+            ui.setName(childName);
             ui.setFullName(file.getAbsolutePath());
             ui.setIsDir(file.isDirectory());
             ui.setIsAnti(false);
@@ -54,13 +52,13 @@ public class SevenZip {
             ui.setAttribDefined(true);
             updateItems.add(ui);
             if (file.isDirectory()) {
-                collectFiles(file.listFiles());
+                collectFiles(childName, file.listFiles());
             }
         }
     }
 
     public SevenZip(String archiveName, File... files) throws IOException {
-        collectFiles(files);
+        collectFiles("", files);
         outStream = new RandomAccessOutputStream(new File(archiveName), "rw");
     }
 
@@ -134,13 +132,20 @@ public class SevenZip {
         LZMACoderInfo info = new LZMACoderInfo();
         setMethodProperties(encoder, inSizeForReduce, info);
 
+        for (UpdateItem ui : updateItems) {
+            if (!ui.isNewData() || !ui.hasStream()) {
+                emptyRefs.add(ui);
+            }
+        }
+
+        for (UpdateItem ui : emptyRefs) {
+            updateItems.remove(ui);
+        }
+
         for (int i = 0; i < updateItems.size(); ) {
             long totalSize = 0;
             for (numSubFiles = 0; i + numSubFiles < updateItems.size() &&
                     numSubFiles < numSolidFiles; numSubFiles++) {
-                if (!updateItems.get(i + numSubFiles).isNewData() || !updateItems.get(i + numSubFiles).hasStream()) {
-                    continue;
-                }
                 totalSize += updateItems.get(i + numSubFiles).getSize();
                 if (totalSize > numSolidBytes) {
                     break;
@@ -150,10 +155,7 @@ public class SevenZip {
                 numSubFiles = 1;
             }
             Folder folder = new Folder();
-            folder.getCoders().clear();
-            folder.getPackStreams().clear();
             folder.getCoders().add(info);
-            folder.getPackStreams().add(0);
             int numUnpackStreams = 0;
 
             SevenZipFolderInStream inStream = new SevenZipFolderInStream();
@@ -170,10 +172,6 @@ public class SevenZip {
                     file.setAttributes(ui.getAttrib());
                     file.setAttributesDefined(true);
                 }
-                file.setLastAccessTime(ui.getaTime());
-                file.setAnti(ui.isAnti());
-                file.setIsStartPosDefined(false);
-
                 file.setSize(ui.getSize());
                 file.setDirectory(ui.isDir());
                 file.setHasStream(ui.hasStream());
@@ -205,12 +203,6 @@ public class SevenZip {
     }
 
     private void fillEmptyRefs(ArchiveDatabase archiveDatabase) {
-        List<UpdateItem> emptyRefs = new ArrayList<>();
-        for (UpdateItem ui : updateItems) {
-            if (!ui.isNewData() || !ui.hasStream()) {
-                emptyRefs.add(ui);
-            }
-        }
         for (UpdateItem emptyRef : emptyRefs) {
             FileItem file = new FileItem();
             file.setName(emptyRef.getName());
@@ -218,9 +210,6 @@ public class SevenZip {
                 file.setAttributes(emptyRef.getAttrib());
                 file.setAttributesDefined(true);
             }
-            file.setLastAccessTime(emptyRef.getaTime());
-            file.setAnti(emptyRef.isAnti());
-            file.setIsStartPosDefined(false);
 
             file.setSize(emptyRef.getSize());
             file.setDirectory(emptyRef.isDir());

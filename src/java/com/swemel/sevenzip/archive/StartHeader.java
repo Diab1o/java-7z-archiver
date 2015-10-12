@@ -1,6 +1,6 @@
 package com.swemel.sevenzip.archive;
 
-class StartHeader {
+public class StartHeader {
     private long nextHeaderOffset;
     private long nextHeaderSize;
     private int nextHeaderCRC;

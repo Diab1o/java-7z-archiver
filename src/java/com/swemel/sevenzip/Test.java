@@ -1,7 +1,7 @@
 package com.swemel.sevenzip;
 
+import java.io.File;
 import java.io.IOException;
-import java.util.Hashtable;
 
 /**
  * Created by IntelliJ IDEA.
@@ -11,7 +11,12 @@ import java.util.Hashtable;
  */
 class Test {
     public static void main(String[] args) {
-
+        try {
+            SevenZip sevenZip = new SevenZip("c:\\test.7z", new File("c:\\Fraps"));
+            sevenZip.createArchive();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
 

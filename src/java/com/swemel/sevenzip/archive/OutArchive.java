@@ -6,7 +6,6 @@ import com.swemel.common.RandomAccessOutputStream;
 import com.swemel.sevenzip.CRC;
 import com.swemel.sevenzip.CoderInfo;
 import com.swemel.sevenzip.Folder;
-import com.swemel.sevenzip.common.BindPair;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -61,15 +60,6 @@ public class OutArchive {
         writeDirect(buf, 24);
     }
 
-    private void skipPrefixArchiveHeader() throws IOException {
-        stream.seek(24, RandomAccessOutputStream.STREAM_SEEK_CUR);
-    }
-
-
-    public long getPos() {
-        return outByte.getProcessedSize();
-    }
-
     void writeBytes(byte[] data, int size) throws IOException {
 
         outByte.writeBytes(data, size);
@@ -118,14 +108,6 @@ public class OutArchive {
 
     }
 
-    public static int getBigNumberSize(long value) {
-        int i;
-        for (i = 1; i < 9; i++)
-            if (value < ((((long) 1) << (i * 7))))
-                break;
-        return i;
-    }
-
     void writeFolder(Folder folder) throws IOException {
         writeNumber(folder.getCoders().size());
         int i;
@@ -159,15 +141,6 @@ public class OutArchive {
                 writeBytes(coder.getProps(), propsSize);
             }
         }
-        for (i = 0; i < folder.getBindPairs().size(); i++) {
-            BindPair bindPair = folder.getBindPairs().get(i);
-            writeNumber(bindPair.getInIndex());
-            writeNumber(bindPair.getOutIndex());
-        }
-        if (folder.getPackStreams().size() > 1)
-            for (i = 0; i < folder.getPackStreams().size(); i++) {
-                writeNumber(folder.getPackStreams().get(i));
-            }
     }
 
     private void writeBytes(ByteBuffer props, int propsSize) throws IOException {
@@ -193,11 +166,7 @@ public class OutArchive {
     }
 
 
-    void writeHashDigests(
-            List<Boolean> digestsDefined,
-            List<Integer> digests) throws IOException {
-
-
+    private void writeHashDigests(List<Boolean> digestsDefined, List<Integer> digests) throws IOException {
         int numDefined = 0;
         int i;
         for (i = 0; i < digestsDefined.size(); i++)
@@ -218,13 +187,10 @@ public class OutArchive {
                 writeUInt32(digests.get(i));
     }
 
-    void writePackInfo(
-            long dataOffset,
-            List<Long> packSizes,
-            List<Boolean> packCRCsDefined,
-            List<Integer> packCRCs) throws IOException {
-        if (packSizes.isEmpty())
+    public void writePackInfo(long dataOffset, List<Long> packSizes) throws IOException {
+        if (packSizes.isEmpty()) {
             return;
+        }
         writeByte((byte) Header.NID.kPackInfo);
         writeNumber(dataOffset);
         writeNumber(packSizes.size());
@@ -232,8 +198,6 @@ public class OutArchive {
         for (Long packSize : packSizes) {
             writeNumber(packSize);
         }
-
-        writeHashDigests(packCRCsDefined, packCRCs);
 
         writeByte((byte) Header.NID.kEnd);
     }
@@ -254,20 +218,15 @@ public class OutArchive {
         }
 
         writeByte((byte) Header.NID.kCodersUnPackSize);
-        int i;
-        for (i = 0; i < folders.size(); i++) {
+        for (int i = 0; i < folders.size(); i++) {
             Folder folder = folders.get(i);
             for (int j = 0; j < folder.getUnpackSizes().size(); j++)
                 writeNumber(folder.getUnpackSizes().get(j));
         }
-
-        List<Boolean> unpackCRCsDefined = new ArrayList<Boolean>();
-        List<Integer> unpackCRCs = new ArrayList<Integer>();
-        for (i = 0; i < folders.size(); i++) {
-            Folder folder = folders.get(i);
-            unpackCRCsDefined.add(folder.isUnpackCRCDefined());
-            unpackCRCs.add(folder.getUnpackCRC());
-        }
+        List<Boolean> unpackCRCsDefined = new ArrayList<>();
+        List<Integer> unpackCRCs = new ArrayList<>();
+        unpackCRCsDefined.add(false);
+        unpackCRCs.add(0);
         writeHashDigests(unpackCRCsDefined, unpackCRCs);
 
         writeByte((byte) Header.NID.kEnd);
@@ -304,19 +263,16 @@ public class OutArchive {
                 index++;
             }
 
-        List<Boolean> digestsDefined2 = new ArrayList<Boolean>();
-        List<Integer> digests2 = new ArrayList<Integer>();
+        List<Boolean> digestsDefined2 = new ArrayList<>();
+        List<Integer> digests2 = new ArrayList<>();
 
         int digestIndex = 0;
         for (int i = 0; i < folders.size(); i++) {
             int numSubStreams = numUnpackStreamsInFolders.get(i);
-            if (numSubStreams == 1 && folders.get(i).isUnpackCRCDefined())
-                digestIndex++;
-            else
-                for (int j = 0; j < numSubStreams; j++, digestIndex++) {
-                    digestsDefined2.add(digestsDefined.get(digestIndex));
-                    digests2.add(digests.get(digestIndex));
-                }
+            for (int j = 0; j < numSubStreams; j++, digestIndex++) {
+                digestsDefined2.add(digestsDefined.get(digestIndex));
+                digests2.add(digests.get(digestIndex));
+            }
         }
         writeHashDigests(digestsDefined2, digests2);
         writeByte((byte) Header.NID.kEnd);
@@ -374,15 +330,13 @@ public class OutArchive {
 
         if (db.getFolders().size() > 0) {
             writeByte((byte) Header.NID.kMainStreamsInfo);
-            writePackInfo(0, db.getPackSizes(),
-                    db.getPackCRCsDefined(),
-                    db.getPackCRCs());
+            writePackInfo(0, db.getPackSizes());
 
             writeUnpackInfo(db.getFolders());
 
-            List<Long> unpackSizes = new ArrayList<Long>();
-            List<Boolean> digestsDefined = new ArrayList<Boolean>();
-            List<Integer> digests = new ArrayList<Integer>();
+            List<Long> unpackSizes = new ArrayList<>();
+            List<Boolean> digestsDefined = new ArrayList<>();
+            List<Integer> digests = new ArrayList<>();
             for (int i = 0; i < db.getFiles().size(); i++) {
                 FileItem file = db.getFiles().get(i);
                 if (!file.hasStream())
@@ -409,106 +363,95 @@ public class OutArchive {
         writeByte((byte) Header.NID.kFilesInfo);
         writeNumber(db.getFiles().size());
 
-        {
-            /* ---------- Empty Streams ---------- */
-            List<Boolean> emptyStreamList = new ArrayList<Boolean>();
-            int numEmptyStreams = 0;
-            for (int i = 0; i < db.getFiles().size(); i++)
-                if (db.getFiles().get(i).hasStream())
-                    emptyStreamList.add(false);
-                else {
-                    emptyStreamList.add(true);
-                    numEmptyStreams++;
-                }
-            if (numEmptyStreams > 0) {
-                writeByte((byte) Header.NID.kEmptyStream);
-                writeNumber(bvGetSizeInBytes(emptyStreamList));
-                writeBoolList(emptyStreamList);
 
-                List<Boolean> emptyFileList = new ArrayList<Boolean>();
-                List<Boolean> antiList = new ArrayList<Boolean>();
-                int numEmptyFiles = 0, numAntiItems = 0;
-                for (int i = 0; i < db.getFiles().size(); i++) {
-                    FileItem file = db.getFiles().get(i);
-                    if (!file.hasStream()) {
-                        emptyFileList.add(!file.isDirectory());
-                        if (!file.isDirectory())
-                            numEmptyFiles++;
-                        boolean isAnti = db.isItemAnti(i);
-                        antiList.add(isAnti);
-                        if (isAnti)
-                            numAntiItems++;
+            /* ---------- Empty Streams ---------- */
+        List<Boolean> emptyStreamList = new ArrayList<>();
+        int numEmptyStreams = 0;
+        for (int i = 0; i < db.getFiles().size(); i++)
+            if (db.getFiles().get(i).hasStream())
+                emptyStreamList.add(false);
+            else {
+                emptyStreamList.add(true);
+                numEmptyStreams++;
+            }
+        if (numEmptyStreams > 0) {
+            writeByte((byte) Header.NID.kEmptyStream);
+            writeNumber(bvGetSizeInBytes(emptyStreamList));
+            writeBoolList(emptyStreamList);
+
+            List<Boolean> emptyFileList = new ArrayList<>();
+            int numEmptyFiles = 0;
+            for (int i = 0; i < db.getFiles().size(); i++) {
+                FileItem file = db.getFiles().get(i);
+                if (!file.hasStream()) {
+                    emptyFileList.add(!file.isDirectory());
+                    if (!file.isDirectory()) {
+                        numEmptyFiles++;
                     }
                 }
+            }
 
-                if (numEmptyFiles > 0) {
-                    writeByte((byte) Header.NID.kEmptyFile);
-                    writeNumber(bvGetSizeInBytes(emptyFileList));
-                    writeBoolList(emptyFileList);
-                }
-
-                if (numAntiItems > 0) {
-                    writeByte((byte) Header.NID.kAnti);
-                    writeNumber(bvGetSizeInBytes(antiList));
-                    writeBoolList(antiList);
-                }
+            if (numEmptyFiles > 0) {
+                writeByte((byte) Header.NID.kEmptyFile);
+                writeNumber(bvGetSizeInBytes(emptyFileList));
+                writeBoolList(emptyFileList);
             }
         }
 
 
-        {
+
+
             /* ---------- Names ---------- */
 
-            int numDefined = 0;
-            int namesDataSize = 0;
+        int numDefined = 0;
+        int namesDataSize = 0;
+        for (int i = 0; i < db.getFiles().size(); i++) {
+            String name = db.getFiles().get(i).getName();
+            if (!name.isEmpty())
+                numDefined++;
+            namesDataSize += (name.length() + 1) * 2;
+        }
+
+        if (numDefined > 0) {
+            namesDataSize++;
+
+            writeByte((byte) Header.NID.kName);
+            writeNumber(namesDataSize);
+            writeByte((byte) 0);
             for (int i = 0; i < db.getFiles().size(); i++) {
                 String name = db.getFiles().get(i).getName();
-                if (!name.isEmpty())
-                    numDefined++;
-                namesDataSize += (name.length() + 1) * 2;
-            }
-
-            if (numDefined > 0) {
-                namesDataSize++;
-                //skipAlign(2 + getBigNumberSize(namesDataSize), 2);
-
-                writeByte((byte) Header.NID.kName);
-                writeNumber(namesDataSize);
-                writeByte((byte) 0);
-                for (int i = 0; i < db.getFiles().size(); i++) {
-                    String name = db.getFiles().get(i).getName();
-                    for (int t = 0; t < name.length(); t++) {
-                        char c = name.charAt(t);
-                        writeByte((byte) c);
-                        writeByte((byte) (c >> 8));
-                    }
-                    writeByte((byte) 0);
-                    writeByte((byte) 0);
+                for (int t = 0; t < name.length(); t++) {
+                    char c = name.charAt(t);
+                    writeByte((byte) c);
+                    writeByte((byte) (c >> 8));
                 }
+                writeByte((byte) 0);
+                writeByte((byte) 0);
             }
         }
+
 
         writeUInt64DefList(db.getMTimesDefined(), db.getMTimes(), Header.NID.kLastWriteTime);
 
-        {
+
             /* ---------- Write Attrib ---------- */
-            List<Boolean> boolList = new ArrayList<Boolean>();
-            int numDefined = 0;
+        List<Boolean> boolList = new ArrayList<>();
+        numDefined = 0;
+        for (int i = 0; i < db.getFiles().size(); i++) {
+            boolean defined = db.getFiles().get(i).isAttributesDefined();
+            boolList.add(defined);
+            if (defined)
+                numDefined++;
+        }
+        if (numDefined > 0) {
+            writeAlignedBoolHeader(boolList, numDefined, (byte) Header.NID.kWinAttributes, 4);
             for (int i = 0; i < db.getFiles().size(); i++) {
-                boolean defined = db.getFiles().get(i).isAttributesDefined();
-                boolList.add(defined);
-                if (defined)
-                    numDefined++;
-            }
-            if (numDefined > 0) {
-                writeAlignedBoolHeader(boolList, numDefined, (byte) Header.NID.kWinAttributes, 4);
-                for (int i = 0; i < db.getFiles().size(); i++) {
-                    FileItem file = db.getFiles().get(i);
-                    if (file.isAttributesDefined())
-                        writeUInt32(file.getAttributes());
-                }
+                FileItem file = db.getFiles().get(i);
+                if (file.isAttributesDefined())
+                    writeUInt32(file.getAttributes());
             }
         }
+
 
         writeByte((byte) Header.NID.kEnd); // for files
         writeByte((byte) Header.NID.kEnd); // for headers
@@ -523,9 +466,6 @@ public class OutArchive {
             headerOffset = 0;
             headerCRC = CRC.calculateDigest(null, 0);
         } else {
-            boolean encodeHeaders = false;
-
-
             outByte.setStream(stream);
             outByte.init();
             crc = new CRC();
@@ -535,14 +475,13 @@ public class OutArchive {
             headerCRC = crc.getDigest();
             headerSize = outByte.getProcessedSize();
         }
-        {
-            StartHeader h = new StartHeader();
-            h.setNextHeaderSize(headerSize);
-            h.setNextHeaderCRC(headerCRC);
-            h.setNextHeaderOffset(headerOffset);
-            stream.seek(8, RandomAccessOutputStream.STREAM_SEEK_SET);
-            writeStartHeader(h);
-        }
+        StartHeader h = new StartHeader();
+        h.setNextHeaderSize(headerSize);
+        h.setNextHeaderCRC(headerCRC);
+        h.setNextHeaderOffset(headerOffset);
+        stream.seek(8, RandomAccessOutputStream.STREAM_SEEK_SET);
+        writeStartHeader(h);
+
     }
 
     public void create(RandomAccessOutputStream stream) throws IOException {
@@ -551,8 +490,7 @@ public class OutArchive {
     }
 
     private void writeSignature() throws IOException {
-        byte[] buff = {'7', 'z', (byte) 0xBC, (byte) 0xAF, 0x27, 0x1C, 0, 3};
-        stream.write(buff);
+        stream.write(Header.kSignature);
     }
 
     public void SkipPrefixArchiveHeader() {

@@ -16,11 +16,6 @@ public class RandomAccessOutputStream extends OutputStream {
     private RandomAccessFile stream;
     private long size = 0;
 
-
-    public RandomAccessOutputStream(String filename, String mode) throws java.io.IOException {
-        stream = new java.io.RandomAccessFile(filename, mode);
-    }
-
     public RandomAccessOutputStream(File file, String mode) throws java.io.IOException {
         stream = new java.io.RandomAccessFile(file, mode);
     }

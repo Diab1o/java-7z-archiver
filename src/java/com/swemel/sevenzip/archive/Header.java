@@ -1,16 +1,7 @@
 package com.swemel.sevenzip.archive;
 
-/**
- * Created by IntelliJ IDEA.
- * User: sokolov_a
- * Date: 24.02.2011
- * Time: 17:59:16
- * To change this template use File | Settings | File Templates.
- */
-class Header {
-    public static final int kSignatureSize = 6;
-    public static byte[] kSignature = {'7', 'z', (byte) 0xBC, (byte) 0xAF, 0x27, 0x1C};
-    public static byte kMajorVersion = 0;
+public class Header {
+    public static byte[] kSignature = {'7', 'z', (byte) 0xBC, (byte) 0xAF, 0x27, 0x1C, 0, 3};
 
     public class NID {
         public static final int kEnd = 0;
