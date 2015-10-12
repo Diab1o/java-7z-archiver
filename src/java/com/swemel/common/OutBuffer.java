@@ -51,7 +51,7 @@ public class OutBuffer {
             writeByte(data[i]);
     }
 
-    void flushPart() throws IOException {
+    private void flushPart() throws IOException {
         int size = (_streamPos >= _pos) ? (_bufferSize - _streamPos) : (_pos - _streamPos);
 
         if (_stream != null) {
@@ -73,7 +73,7 @@ public class OutBuffer {
         }
     }
 
-    void flushWithCheck() throws IOException {
+    private void flushWithCheck() throws IOException {
         flush();
     }
 }

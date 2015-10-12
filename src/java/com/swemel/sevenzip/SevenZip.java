@@ -5,11 +5,14 @@ import com.swemel.sevenzip.archive.ArchiveDatabase;
 import com.swemel.sevenzip.archive.FileItem;
 import com.swemel.sevenzip.archive.OutArchive;
 import com.swemel.sevenzip.archive.SevenZipFolderInStream;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * This is rough java implementation of 7z archive algorithm. Translated into Java from C++.
@@ -17,6 +20,8 @@ import java.util.List;
  */
 
 public class SevenZip {
+    private final Logger logger = LogManager.getLogger(SevenZip.class);
+
     private final List<UpdateItem> updateItems = new ArrayList<>();
     private final List<UpdateItem> emptyRefs = new ArrayList<>();
     private RandomAccessOutputStream outStream;
@@ -24,7 +29,7 @@ public class SevenZip {
     private void collectFiles(String path, File... files) {
         for (File file : files) {
             if (!file.canRead()) {
-                System.err.println("Can't read from file:" + file.getAbsolutePath());
+                logger.warn("Can't read from file %:", file.getAbsolutePath());
                 continue;
             }
             UpdateItem ui = new UpdateItem();
@@ -58,6 +63,7 @@ public class SevenZip {
     }
 
     public SevenZip(String archiveName, File... files) throws IOException {
+        logger.info("Compression started");
         collectFiles("", files);
         outStream = new RandomAccessOutputStream(new File(archiveName), "rw");
     }
@@ -93,16 +99,6 @@ public class SevenZip {
         encoder.setLcLpPb(3, 0, 2);
     }
 
-    private static boolean isExeExt(String s) {
-        if (s.equalsIgnoreCase("exe")) return true;
-        if (s.equalsIgnoreCase("dll")) return true;
-        if (s.equalsIgnoreCase("ocx")) return true;
-        if (s.equalsIgnoreCase("sfx")) return true;
-        if (s.equalsIgnoreCase("sys")) return true;
-        return false;
-
-    }
-
     public void createArchive() throws IOException {
         OutArchive archive = new OutArchive();
         ArchiveDatabase newDatabase = new ArchiveDatabase();
@@ -126,21 +122,14 @@ public class SevenZip {
         }
 
         archive.create(outStream);
-        archive.SkipPrefixArchiveHeader();
+        archive.skipPrefixArchiveHeader();
         com.swemel.sevenzip.compression.lzma.Encoder encoder = new com.swemel.sevenzip.compression.lzma.Encoder();
         int numSubFiles;
         LZMACoderInfo info = new LZMACoderInfo();
         setMethodProperties(encoder, inSizeForReduce, info);
 
-        for (UpdateItem ui : updateItems) {
-            if (!ui.isNewData() || !ui.hasStream()) {
-                emptyRefs.add(ui);
-            }
-        }
-
-        for (UpdateItem ui : emptyRefs) {
-            updateItems.remove(ui);
-        }
+        emptyRefs.addAll(updateItems.stream().filter(ui -> !ui.isNewData() || !ui.hasStream()).collect(Collectors.toList()));
+        emptyRefs.forEach(updateItems::remove);
 
         for (int i = 0; i < updateItems.size(); ) {
             long totalSize = 0;

@@ -59,10 +59,6 @@ public class UpdateItem {
         this.newData = newData;
     }
 
-    public boolean isAnti() {
-        return isAnti;
-    }
-
     public void setIsAnti(boolean isAnti) {
         this.isAnti = isAnti;
     }

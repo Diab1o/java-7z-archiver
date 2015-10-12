@@ -31,7 +31,7 @@ public class SevenZipFolderInStream extends InputStream {
         _fileIsOpen = false;
     }
 
-    void openStream() throws FileNotFoundException {
+    private void openStream() throws FileNotFoundException {
         _filePos = 0;
         while (_fileIndex < _numFiles) {
             stream = new InStreamWithCRC(updateItems.get(off + _fileIndex).getFullName());
@@ -46,11 +46,11 @@ public class SevenZipFolderInStream extends InputStream {
         }
     }
 
-    void addDigest() {
+    private void addDigest() {
         CRCs.add(stream.getCrc());
     }
 
-    void closeStream() throws IOException {
+    private void closeStream() throws IOException {
         stream.releaseStream();
         _fileIsOpen = false;
         sizes.add(_filePos);

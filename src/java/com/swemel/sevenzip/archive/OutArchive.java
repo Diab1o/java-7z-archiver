@@ -6,6 +6,8 @@ import com.swemel.common.RandomAccessOutputStream;
 import com.swemel.sevenzip.CRC;
 import com.swemel.sevenzip.CoderInfo;
 import com.swemel.sevenzip.Folder;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -13,6 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class OutArchive {
+
+    private final Logger logger = LogManager.getLogger(OutArchive.class);
 
     private RandomAccessOutputStream stream;
     private final OutBuffer outByte;
@@ -24,7 +28,7 @@ public class OutArchive {
         outByte.create(1 << 16);
     }
 
-    void writeBytes(OutputStream stream, byte[] data, int size) throws IOException {
+    private void writeBytes(OutputStream stream, byte[] data, int size) throws IOException {
         int processedSize = 0;
         while (size > 0) {
             int curSize = size < 0x0FFFFFFF ? size : 0x0FFFFFFF;
@@ -36,7 +40,7 @@ public class OutArchive {
     }
 
 
-    void writeDirect(byte[] data, int size) throws IOException {
+    private void writeDirect(byte[] data, int size) throws IOException {
         writeBytes(stream, data, size);
     }
 
@@ -51,7 +55,7 @@ public class OutArchive {
     }
 
 
-    void writeStartHeader(StartHeader h) throws IOException {
+    private void writeStartHeader(StartHeader h) throws IOException {
         byte[] buf = new byte[24];
         setUInt64(buf, 4, h.getNextHeaderOffset());
         setUInt64(buf, 12, h.getNextHeaderSize());
@@ -60,35 +64,35 @@ public class OutArchive {
         writeDirect(buf, 24);
     }
 
-    void writeBytes(byte[] data, int size) throws IOException {
+    private void writeBytes(byte[] data, int size) throws IOException {
 
         outByte.writeBytes(data, size);
         crc.update(data, size);
 
     }
 
-    void writeByte(Byte b) throws IOException {
+    private void writeByte(Byte b) throws IOException {
 
         outByte.writeByte(b);
         crc.updateByte(b);
 
     }
 
-    void writeUInt32(int value) throws IOException {
+    private void writeUInt32(int value) throws IOException {
         for (int i = 0; i < 4; i++) {
             writeByte((byte) value);
             value >>= 8;
         }
     }
 
-    void writeUInt64(long value) throws IOException {
+    private void writeUInt64(long value) throws IOException {
         for (int i = 0; i < 8; i++) {
             writeByte((byte) value);
             value >>= 8;
         }
     }
 
-    void writeNumber(long value) throws IOException {
+    private void writeNumber(long value) throws IOException {
         byte firstByte = 0;
         byte mask = (byte) 0x80;
         int i;
@@ -108,7 +112,7 @@ public class OutArchive {
 
     }
 
-    void writeFolder(Folder folder) throws IOException {
+    private void writeFolder(Folder folder) throws IOException {
         writeNumber(folder.getCoders().size());
         int i;
         for (i = 0; i < folder.getCoders().size(); i++) {
@@ -187,7 +191,7 @@ public class OutArchive {
                 writeUInt32(digests.get(i));
     }
 
-    public void writePackInfo(long dataOffset, List<Long> packSizes) throws IOException {
+    private void writePackInfo(long dataOffset, List<Long> packSizes) throws IOException {
         if (packSizes.isEmpty()) {
             return;
         }
@@ -218,8 +222,7 @@ public class OutArchive {
         }
 
         writeByte((byte) Header.NID.kCodersUnPackSize);
-        for (int i = 0; i < folders.size(); i++) {
-            Folder folder = folders.get(i);
+        for (Folder folder : folders) {
             for (int j = 0; j < folder.getUnpackSizes().size(); j++)
                 writeNumber(folder.getUnpackSizes().get(j));
         }
@@ -493,11 +496,11 @@ public class OutArchive {
         stream.write(Header.kSignature);
     }
 
-    public void SkipPrefixArchiveHeader() {
+    public void skipPrefixArchiveHeader() {
         try {
             stream.seek(24, RandomAccessOutputStream.STREAM_SEEK_CUR);
         } catch (IOException e) {
-            System.err.println(e.toString());
+            logger.error(e);
         }
     }
 

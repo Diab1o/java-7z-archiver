@@ -7,9 +7,9 @@ import java.util.List;
 
 public final class ArchiveDatabase {
     private final List<Long> packSizes = new ArrayList<>();
-    private List<Folder> folders = new ArrayList<>();
-    private List<Integer> numUnPackStreamsVector = new ArrayList<>();
-    private List<FileItem> files = new ArrayList<>();
+    private final List<Folder> folders = new ArrayList<>();
+    private final List<Integer> numUnPackStreamsVector = new ArrayList<>();
+    private final List<FileItem> files = new ArrayList<>();
     private final List<Long> mTimes = new ArrayList<>();
     private final List<Boolean> mTimesDefined = new ArrayList<>();
 
